@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .active { background-color: #2563eb; color: white; }
-    .submenu { display: none; }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -29,7 +28,7 @@
           <button class="w-full flex justify-between items-center px-3 py-2 rounded hover:bg-blue-100 submenu-btn">
             Usuários <span>▼</span>
           </button>
-          <ul class="ml-4 mt-1 space-y-1 submenu">
+          <ul class="ml-4 mt-1 space-y-1 submenu hidden">
             <li><a href="#" onclick="loadPage('main/home.html')" class="block px-3 py-2 rounded hover:bg-blue-100">Lista</a></li>
             <li><a href="#" onclick="loadPage('main/about.html')" class="block px-3 py-2 rounded hover:bg-blue-100">Criar Novo</a></li>
           </ul>
@@ -39,7 +38,7 @@
           <button class="w-full flex justify-between items-center px-3 py-2 rounded hover:bg-blue-100 submenu-btn">
             Configurações <span>▼</span>
           </button>
-          <ul class="ml-4 mt-1 space-y-1 submenu">
+          <ul class="ml-4 mt-1 space-y-1 submenu hidden">
             <li><a href="#" onclick="loadPage('main/services.html')" class="block px-3 py-2 rounded hover:bg-blue-100">Perfil</a></li>
             <li><a href="#" onclick="loadPage('main/contact.html')" class="block px-3 py-2 rounded hover:bg-blue-100">Segurança</a></li>
           </ul>
@@ -80,46 +79,51 @@
 
   <!-- Scripts -->
   <script>
-    // Submenu toggle
-    document.querySelectorAll(".submenu-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const submenu = btn.nextElementSibling;
-        submenu.classList.toggle("hidden");
-        btn.querySelector("span").textContent = submenu.classList.contains("hidden") ? "▼" : "▲";
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // Submenu toggle
+      document.querySelectorAll(".submenu-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const submenu = btn.nextElementSibling;
+          submenu.classList.toggle("hidden");
+          btn.querySelector("span").textContent = submenu.classList.contains("hidden") ? "▼" : "▲";
+        });
       });
+
+      // Load page dinamicamente
+      function loadPage(url) {
+        fetch(url)
+          .then(response => response.text())
+          .then(html => {
+            document.getElementById("main-content").innerHTML = html;
+            updateScrollSpy(); // atualizar scrollspy para novo conteúdo
+          })
+          .catch(err => console.error("Erro ao carregar a página:", err));
+      }
+      window.loadPage = loadPage; // função global para onclick
+
+      // ScrollSpy
+      function updateScrollSpy() {
+        const sections = document.querySelectorAll("#main-content section");
+        const navLinks = document.querySelectorAll("#scrollspy a");
+
+        window.addEventListener("scroll", () => {
+          let current = "";
+          sections.forEach(section => {
+            const sectionTop = section.offsetTop - 150;
+            if (scrollY >= sectionTop) current = section.getAttribute("id");
+          });
+          navLinks.forEach(link => {
+            link.classList.remove("active");
+            if (link.getAttribute("href") === "#" + current) link.classList.add("active");
+          });
+        });
+      }
+
+      // Inicializa scrollspy
+      updateScrollSpy();
+
     });
-
-    // Load page dinamicamente
-    function loadPage(url) {
-      fetch(url)
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById("main-content").innerHTML = html;
-          updateScrollSpy(); // atualizar scrollspy para novo conteúdo
-        })
-        .catch(err => console.error("Erro ao carregar a página:", err));
-    }
-
-    // ScrollSpy
-    function updateScrollSpy() {
-      const sections = document.querySelectorAll("#main-content section");
-      const navLinks = document.querySelectorAll("#scrollspy a");
-
-      window.addEventListener("scroll", () => {
-        let current = "";
-        sections.forEach(section => {
-          const sectionTop = section.offsetTop - 150;
-          if (scrollY >= sectionTop) current = section.getAttribute("id");
-        });
-        navLinks.forEach(link => {
-          link.classList.remove("active");
-          if (link.getAttribute("href") === "#" + current) link.classList.add("active");
-        });
-      });
-    }
-
-    // Inicializa scrollspy
-    updateScrollSpy();
   </script>
 
 </body>
